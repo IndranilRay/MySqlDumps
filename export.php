@@ -1,15 +1,14 @@
 <?php
-/***** EDIT BELOW LINES *****/
-$DB_Server = "localhost"; // MySQL Server
-$DB_Username = "root"; // MySQL Username
-$DB_Password = "root"; // MySQL Password
-$DB_DBName = "metrics_air_quality"; // MySQL Database Name
-$DB_TBLName = "madrid_2001"; // MySQL Table Name
+require_once 'config.php';
+// /***** EDIT BELOW LINES *****/
+// $DB_Server = "localhost"; // MySQL Server
+// $DB_Username = "root"; // MySQL Username
+// $DB_Password = "root"; // MySQL Password
+// $DB_DBName = "metrics_air_quality"; // MySQL Database Name
+// $DB_TBLName = "madrid_2001"; // MySQL Table Name
+// $mysqli = new mysqli('localhost', 'root', 'root', 'metrics_air_quality');
+
 $xls_filename = 'export_'.date('Y-m-d').'.xls'; // Define Excel (.xls) file name
-
-
-$mysqli = new mysqli('localhost', 'root', 'root', 'metrics_air_quality');
-
 
 if ($mysqli->connect_error) {
 	die('Connect Error (' . $mysqli->connect_errno . ') '
@@ -20,9 +19,6 @@ if ($mysqli->connect_error) {
 // Create MySQL connection
 $sql = "Select BEN,CO,EBE,MXY,NMHC,NO_2,station from $DB_TBLName LIMIT 100000";
 
-
-
-  
    
 // Header info settings
 header("Content-Type: application/xls");
