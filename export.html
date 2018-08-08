@@ -1,0 +1,97 @@
+`<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
+    <title>Export To Excel!</title>
+  </head>
+  <body>
+    <h1>Export To Excel!</h1>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    <div class="row">
+      <div class="col-md-4"></div>
+      <div class="col-md-8">
+        <form>
+          <button type="button" id="submit" class="btn btn-primary">Get Excel</button>
+          <progress value="0" max="100" id="progress">0%</progress><div id="percentage"></div>
+        </form>
+      </div>
+    </div>
+  </body>
+  <footer>
+    <script type="text/javascript">
+      $(document).ready(function() {
+        var ts = Math.round((new Date()).getTime() / 1000);
+        var progressCnt = 0;
+
+        $( "#submit" ).click(function() {
+
+            // Prevent default posting of form - put here to work in case of errors
+            event.preventDefault();
+
+            triggerExportProcess();
+
+            callProgress();
+        });
+
+        // Method call getProgress() method after a time inteval
+        function callProgress(){
+          if(progressCnt <= 100 ){
+            getProgress();
+            setTimeout(callProgress,100);
+          } else {
+            return false;
+          }
+        }
+
+        // Method check progess counter and update progress bar
+        function getProgress(){
+          request = $.ajax({
+              type: 'POST',
+              url: "progress.php",
+              data: { 'progress': "start", 'timestmp': ts},
+          });
+
+          // Callback handler that will be called on success
+          request.done(function (response, textStatus, jqXHR){
+              progressCnt = response;
+              $("#progress").val(progressCnt);
+              $("#percentage").html(progressCnt + "% completed");
+              //console.log(response);
+              // Log a message to the console
+              //console.log("Progress!");
+          });
+
+        }
+
+        // Method call server side script to fetch data and export
+        function triggerExportProcess(){
+
+          request = $.ajax({
+            type: 'POST',
+            url: "export.php",
+            data: { 'export': "start",'timestmp':ts},
+          });
+          
+          // Callback handler that will be called on success
+          request.done(function (response, textStatus, jqXHR){
+            window.open('export.php','_blank' );
+            // window.open('export.php',"Progress","width=550,height=170,left=250,top=200,toolbar=0,status=0,");
+            // console.log('Response='+response);
+            // Log a message to the console
+            console.log("Hooray, it worked!");
+          });
+        }
+      })
+    </script>
+  </footer>
+</html>

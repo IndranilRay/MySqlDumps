@@ -1,18 +1,26 @@
 <?php
+error_reporting(E_ERROR | E_PARSE | E_CORE_ERROR);
+set_time_limit ( 60 ) ;
 require_once 'config.php';
-// /***** EDIT BELOW LINES *****/
-// $DB_Server = "localhost"; // MySQL Server
-// $DB_Username = "root"; // MySQL Username
-// $DB_Password = "root"; // MySQL Password
-// $DB_DBName = "metrics_air_quality"; // MySQL Database Name
-// $DB_TBLName = "madrid_2001"; // MySQL Table Name
-// $mysqli = new mysqli('localhost', 'root', 'root', 'metrics_air_quality');
 
+$DB_TBLName = "madrid_2001"; // MySQL Table Name
+$DB_PROGRESS_TBLName = "progress"; // Progress Table
 $xls_filename = 'export_'.date('Y-m-d').'.xls'; // Define Excel (.xls) file name
 
 if ($mysqli->connect_error) {
 	die('Connect Error (' . $mysqli->connect_errno . ') '
 	. $mysqli->connect_error);
+}
+
+if($_POST['timestmp']	!=	'' ) {
+	$timestamp = $_POST['timestmp'];
+
+	$del_sql = "DELETE FROM $DB_PROGRESS_TBLName WHERE timestmp ={$timestamp}";
+	$mysqli->query($del_sql);
+
+	$insert_sql = "INSERT INTO $DB_PROGRESS_TBLName (progress,timestmp) VALUES (0,{$timestamp})";
+	$mysqli->query($insert_sql);
+	echo $mysqli->insert_id;
 }
    
 /***** DO NOT EDIT BELOW LINES *****/
@@ -31,7 +39,7 @@ header("Expires: 0");
 $sep = "\t"; // tabbed character
 
 
-if( $result = $mysqli->query($sql, MYSQLI_USE_RESULT) ) {
+if( $result = $mysqli->query($sql) ) {
 
 	// Get field information for all fields
 	$fieldinfo = $result->fetch_fields();
@@ -40,10 +48,17 @@ if( $result = $mysqli->query($sql, MYSQLI_USE_RESULT) ) {
 	}
 	print("\n");
 
-
+	$cnt = 0;
 	// fetch object array
 	while ( $row = $result->fetch_row() ) {
 		$schema_insert = "";
+		$cnt++;
+
+		if ( $cnt % 10000 == 0 && $cnt <= 100000 ){
+			$update_sql = "UPDATE $DB_PROGRESS_TBLName  SET progress=progress + 10 WHERE timestmp ={$timestamp} ";
+			$update = $mysqli->query($update_sql);
+			sleep($delay);
+		}
 		for($j=0; $j<$result->field_count; $j++)
 	    {
 	      if(!isset($row[$j])) {
